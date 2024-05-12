@@ -1,9 +1,74 @@
-# Nexu Backend Coding Exercise
-Our goal is to give you a small coding challenge that gives you a chance to show off your skills while giving you an idea of some of the problems that you may encounter at Nexu. We know you're busy with life, so we hope that you can spend around 2 hours working through this exercise. We don't expect you to finish in 2 hours, so don't worry if you can't. Submit what you have along with some notes on your thoughts and how you would proceed if you had more time. Most importantly, try to have some fun with it!
+# nexu-backend-test
 
-## Overview
-You just got hired to join the *cool* engineering team at *Nexu*! The first story in your sprint backlog is to build a backend application for an already existing frontend. The frontend needs the next routes:
+Este proyecto es resultado de una prueba técnica para Nexu, que tiene como objetivo mostrar algunas de las habilidades
+del programador desarrollando aplicaciones backend.
 
+# Requisitos Previos
+
+Para trabajar/ejecutar con este proyecto debes tener previamente instaladas las siguientes herramientas:
+
+- Docker Descktop
+- Node.js
+- PostgreSQL (opcional - lee el apartado [Opcon 1](#ejecutar-aplicación-opcion-1)})
+
+# Instalación
+
+```bash
+npm install
+npm install -g knex
+npm install -g nodemon
+```
+
+# Configuración
+
+Crea los archivos `.env.dev`,`.env.prod` y `.env.test` dentro del directorio `config/environment` con las siguientes
+variables:
+
+```plaintext
+DB_USER=
+DB_HOST=
+DB_NAME=
+DB_PASSWORD=
+DB_PORT=
+HOST_PORT=
+```
+
+los valores te serán enviados por e-mail
+
+# Ejecutar aplicación (Opcion 1)
+
+Para ejecutar la aplicación solo es neceario ejecutar el siguiente comando.
+
+```bash
+docker compose --env-file ./config/environment/.env.prod up
+```
+
+Las tareas que realiza son:
+
+- Lo que hace es descargar la imágen de postgres, crear su contenedor y arrancarlo
+- Generar una imagen de nuestra aplicación, crear un contenedor y arrancarlo.
+
+Para detener los contenedores y borrarlos debes ejecutar:
+
+```bash
+docker compose --env-file ./config/environment/.env.prod down
+```
+
+# Ejecutar aplicación (Opcion 2)
+
+## Base de Datos
+
+Para la gestión y control de la base de datos se implementaron migraciones con `knex.js`.
+Las migraciones se guardan dentro del directorio `migrations`, para aplicarlas ejecuta el siguiente comando dentro de la
+carpeta del proyecto.
+
+```bash
+knex migrate:latest
+```
+
+# Uso
+
+Ésta aplicación cuenta con las siguientes rutas:
 
 ```
                               GET    /brands
@@ -16,96 +81,118 @@ You just got hired to join the *cool* engineering team at *Nexu*! The first stor
 
 #### GET /brands
 
-List all brands 
+Devuelve una lista de todas las marcas en formato Json
+
 ```json
 [
-  {"id": 1, "nombre": "Acura", "average_price": 702109},
-  {"id": 2, "nombre": "Audi", "average_price": 630759},
-  {"id": 3, "nombre": "Bentley", "average_price": 3342575},
-  {"id": 4, "nombre": "BMW", "average_price": 858702},
-  {"id": 5, "nombre": "Buick", "average_price": 290371},
+  {
+    "id": 1,
+    "nombre": "Acura",
+    "average_price": 702110
+  },
+  {
+    "id": 2,
+    "nombre": "Audi",
+    "average_price": 630759
+  },
   "..."
 ]
 ```
-The average price of each brand is the average of its models average prices
+
+El valor de `average_price` es el promedio del valor de `average_price` de sus modelos.
 
 #### GET /brands/:id/models
 
-List all models of the brand
+Devuelve una lista con todos los modelos que pertenecen a la marca
+
 ```json
 [
-  {"id": 1, "name": "ILX", "average_price": 303176},
-  {"id": 2, "name": "MDX", "average_price": 448193},
-  {"id": 1264, "name": "NSX", "average_price": 3818225},
-  {"id": 3, "name": "RDX", "average_price": 395753},
-  {"id": 354, "name": "RL", "average_price": 239050}
+  {
+    "id": 1,
+    "name": "ILX",
+    "average_price": 303176
+  },
+  {
+    "id": 2,
+    "name": "MDX",
+    "average_price": 448193
+  },
+  "..."
 ]
 ```
 
 #### POST /brands
 
-You may add new brands. A brand name must be unique.
+Permite agregar más marcas siempre y cuando no existan en la BD.
 
 ```json
-{"name": "Toyota"}
+{
+  "name": "Toyota"
+}
 ```
-
-If a brand name is already in use return a response code and error message reflecting it.
-
 
 #### POST /brands/:id/models
 
-You may add new models to a brand. A model name must be unique inside a brand.
+Permite agregar nuevos modelos a una marca siempre y cuando no exista ese modelo para esa marca y que el valor
+de `average_price` sea mayor a 100,000.
 
 ```json
-{"name": "Prius", "average_price": 406400}
+{
+  "name": "Prius",
+  "average_price": 406400
+}
 ```
-If the brand id doesn't exist return a response code and error message reflecting it.
-
-If the model name already exists for that brand return a response code and error message reflecting it.
-
-Average price is optional, if supply it must be greater than 100,000.
-
 
 #### PUT /models/:id
 
-You may edit the average price of a model.
+Permite modificar el valor de `average_price` del modelo indicado, siempre y cuando sea mayor a 100,000
 
 ```json
-{"average_price": 406400}
+{
+  "average_price": 406400
+}
 ```
-The average_price must be greater then 100,000.
 
 #### GET /models?greater=&lower=
 
-List all models. 
-If greater param is included show all models with average_price greater than the param
-If lower param is included show all models with average_price lower than the param
+Devuelve una lista con todos los modelos. Además acepta los filtros `greater` y `lower`
+Si `greater` es enviado, entonces devuelve todos los modelos con un `average_price` mayor al indicado
+Si `lower` es enviado, entonces devuelve todos los modelos con un `average_price` menor al indicado
+
 ```
 # /models?greater=380000&lower=400000
 ```
+
 ```json
 [
-  {"id": 1264, "name": "NSX", "average_price": 3818225},
-  {"id": 3, "name": "RDX", "average_price": 395753}
+  {
+    "id": 3,
+    "name": "RDX",
+    "average_price": 395753
+  },
+  {
+    "id": 171,
+    "name": "Wrangler",
+    "average_price": 396757
+  },
+  "..."
 ]
 ```
 
-- Code all the endpoints and the logic needed
+## Pruebas
 
-- Create a database to store this information
+Información sobre cómo ejecutar las pruebas automatizadas.
 
-- Populate the database from the json included in this repository
+```bash
+npm test
+```
 
-## Requirements
-- your code should be linted
-- your code should include at least a couple of tests
-- your code should include a `README.md` file in the root with instructions for building, running, and testing. It can also include notes on your thought process and any issues you may have run into.
+## Construido con
 
-## Submission
-Please upload this repository to Github and submit to @remigioamc when complete. Also, we would love your feedback, so feel free to share your thoughts on the exercise!
+- [Express.js](https://expressjs.com/) - El framework web usado
+- [PostgreSQL](https://www.mongodb.com/) - Base de datos
+- [Node.js](https://nodejs.org/) - Entorno de ejecución
 
-## Bonus
-Deploy your application so we can test it against our frontend. Share the URL.
+## Autores
 
-
+- **ISC. Arturo Sánchez Fonseca**
