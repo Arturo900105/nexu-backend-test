@@ -1,5 +1,6 @@
+const { default: logger } = require('../../config/monitoring/logger.js');
+
 const handleError = async (err, req, res, next) => {
-    const { default: logger } = await import('../../config/monitoring/logger.js');
     const {code, statusCode, message} = err;
     const response = () => {
         switch (code) {
