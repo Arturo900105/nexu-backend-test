@@ -1,5 +1,4 @@
-const { default: logger } = require('../../config/monitoring/logger.js');
-
+const logger = require("../../config/monitoring/logger.cjs");
 const handleError = async (err, req, res, next) => {
     const {code, statusCode, message} = err;
     const response = () => {

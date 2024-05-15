@@ -1,5 +1,4 @@
-import logger from "../../config/monitoring/logger.js";
-
+const logger = require("../../config/monitoring/logger.cjs");
 const logRequest = (req, res, next) => {
     const { method, url } = req;
     const start = process.hrtime();
@@ -14,4 +13,6 @@ const logRequest = (req, res, next) => {
     next();
 };
 
-export default logRequest;
+module.exports = {
+    logRequest
+};
